@@ -33,7 +33,7 @@ It allows the shop owner to **add, update, delete, and sell products**, track da
    ```bash
     https://github.com/saiharanadh/ShopManagementSystem.git
 2.Open the project in your Java IDE.
-3.Compile and run ShopManagementSystem.java.
+3.Compile and run Shop-Management-System.java.
 3.Login credentials:
 Username: owner
 Password: shop123
