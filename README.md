@@ -1,6 +1,6 @@
 # Shop-Management-System
 A Java Swing-based shop management system with billing and inventory tracking.
-# 🏪 Shop Management System
+# 🏪 Shop-Management-System
 
 A simple and interactive **Java Swing-based desktop application** for managing shop inventory, sales, and daily revenue.  
 It allows the shop owner to **add, update, delete, and sell products**, track daily revenue, generate reports, and undo mistakes — all through a clean graphical interface.
@@ -31,7 +31,7 @@ It allows the shop owner to **add, update, delete, and sell products**, track da
 ## ⚙️ How to Run
 1. Download or clone this repository:
    ```bash
-    https://github.com/saiharanadh/ShopManagementSystem.git
+    https://github.com/saiharanadh/Shop-Management-System.git
 2.Open the project in your Java IDE.
 3.Compile and run Shop-Management-System.java.
 3.Login credentials:
