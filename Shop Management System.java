@@ -1,4 +1,5 @@
 import java.awt.*;
+import java.awt.event.*;
 import java.util.ArrayList;
 import javax.swing.*;
 
@@ -35,8 +36,8 @@ class Sale {
 }
 
 public class ShopManagementSystem {
-    static ArrayList<Product> products = new ArrayList<>();
-    static ArrayList<Sale> dailySales = new ArrayList<>();
+    static ArrayList<Product> products = new ArrayList<Product>();
+    static ArrayList<Sale> dailySales = new ArrayList<Sale>();
     static Sale lastSale = null;
 
     // Quick Revenue Label
@@ -68,14 +69,16 @@ public class ShopManagementSystem {
         loginFrame.add(loginButton);
         loginFrame.setVisible(true);
 
-        loginButton.addActionListener(e -> {
-            String user = userField.getText();
-            String pass = new String(passField.getPassword());
-            if (user.equals("owner") && pass.equals("shop123")) {
-                loginFrame.dispose();
-                showDashboard();
-            } else {
-                JOptionPane.showMessageDialog(loginFrame, "Invalid Username or Password!");
+        loginButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                String user = userField.getText();
+                String pass = new String(passField.getPassword());
+                if (user.equals("owner") && pass.equals("shop123")) {
+                    loginFrame.dispose();
+                    showDashboard();
+                } else {
+                    JOptionPane.showMessageDialog(loginFrame, "Invalid Username or Password!");
+                }
             }
         });
     }
@@ -142,14 +145,14 @@ public class ShopManagementSystem {
 
         dash.setVisible(true);
 
-        // Actions
-        addBtn.addActionListener(e -> addOrUpdateProduct());
-        sellBtn.addActionListener(e -> { sellProduct(); updateTotalRevenue(); });
-        deleteBtn.addActionListener(e -> deleteProduct());
-        undoBtn.addActionListener(e -> { undoLastSale(); updateTotalRevenue(); });
-        reportBtn.addActionListener(e -> showDailyReport());
-        inventoryBtn.addActionListener(e -> viewInventory());
-        searchBtn.addActionListener(e -> searchProduct());
+        // Actions (lambda -> anonymous inner classes for older Java)
+        addBtn.addActionListener(new ActionListener() { public void actionPerformed(ActionEvent e) { addOrUpdateProduct(); } });
+        sellBtn.addActionListener(new ActionListener() { public void actionPerformed(ActionEvent e) { sellProduct(); updateTotalRevenue(); } });
+        deleteBtn.addActionListener(new ActionListener() { public void actionPerformed(ActionEvent e) { deleteProduct(); } });
+        undoBtn.addActionListener(new ActionListener() { public void actionPerformed(ActionEvent e) { undoLastSale(); updateTotalRevenue(); } });
+        reportBtn.addActionListener(new ActionListener() { public void actionPerformed(ActionEvent e) { showDailyReport(); } });
+        inventoryBtn.addActionListener(new ActionListener() { public void actionPerformed(ActionEvent e) { viewInventory(); } });
+        searchBtn.addActionListener(new ActionListener() { public void actionPerformed(ActionEvent e) { searchProduct(); } });
     }
 
     // ===== PRELOAD PRODUCTS =====
@@ -233,18 +236,20 @@ public class ShopManagementSystem {
             lastSale = dailySales.get(dailySales.size()-1);
 
             // Low Stock / Out of Stock alerts
-            if (p.quantity == 0)
-                JOptionPane.showMessageDialog(null, p.name + " is now OUT OF STOCK!");
-            else if (p.quantity <= 5)
-                JOptionPane.showMessageDialog(null, "Low Stock Warning for " + p.name + "! Remaining: " + p.quantity);
+            if (p.quantity == 0) {
+                JOptionPane.showMessageDialog(null, "Product is now out of stock!");
+            } else if (p.quantity <= 5) {
+                JOptionPane.showMessageDialog(null, "Low stock alert! Only " + p.quantity + " remaining.");
+            }
 
             // Invoice
-            JOptionPane.showMessageDialog(null,
-                "Product: " + p.name + "\nQty: " + qty +
-                "\nPrice before: " + p.price +
-                "\nDiscount: " + p.discount + "%" +
-                "\nPrice after: " + p.priceAfterDiscount() +
-                "\nTotal: " + total);
+            String invoice = "INVOICE\n\n" +
+                             "Product: " + p.name + "\n" +
+                             "Quantity: " + qty + "\n" +
+                             "Price per unit: " + String.format("%.2f", p.priceAfterDiscount()) + "\n" +
+                             "Total: " + String.format("%.2f", total);
+            JOptionPane.showMessageDialog(null, invoice, "Sale Complete", JOptionPane.INFORMATION_MESSAGE);
+            updateTotalRevenue();
 
         } catch (Exception e) { JOptionPane.showMessageDialog(null, "Invalid input!"); }
     }
@@ -278,8 +283,8 @@ public class ShopManagementSystem {
         double total = 0;
         for (int i = 0; i < dailySales.size(); i++) {
             Sale s = dailySales.get(i);
-            sb.append((i+1)+") "+s.product.name+" | Qty: "+s.quantitySold+
-                      " | Total: "+String.format("%.2f", s.totalPrice)+"\n");
+            sb.append(String.format("%d. %s x%d = %.2f\n", 
+                i+1, s.product.name, s.quantitySold, s.totalPrice));
             total += s.totalPrice;
         }
         sb.append("\nTotal Revenue: "+String.format("%.2f", total));
@@ -302,13 +307,8 @@ public class ShopManagementSystem {
         StringBuilder sb = new StringBuilder();
         sb.append("Inventory:\n\n");
         for (Product p : products) {
-            sb.append("Serial: "+p.serial+"\n");
-            sb.append("Name: "+p.name+"\n");
-            sb.append("Price before: "+p.price+"\n");
-            sb.append("Price after: "+p.priceAfterDiscount()+"\n");
-            sb.append("Discount: "+p.discount+"%\n");
-            sb.append("Quantity: "+p.quantity+"\n");
-            sb.append("-----------------------------\n");
+            sb.append(String.format("%-5d %-20s %-10.2f %-10.2f %-10.2f %d\n",
+                p.serial, p.name, p.price, p.discount, p.priceAfterDiscount(), p.quantity));
         }
 
         JTextArea area = new JTextArea(sb.toString());
@@ -328,9 +328,15 @@ public class ShopManagementSystem {
         String input = JOptionPane.showInputDialog("Enter Serial Number or Product Name:");
         if (input == null) return;
         Product p = null;
-        try { p = findProductBySerial(Integer.parseInt(input.trim())); }
-        catch (Exception e) { p = findProductByName(input.trim()); }
-        if (p == null) { JOptionPane.showMessageDialog(null, "Product not found!"); return; }
+        try {
+            p = findProductBySerial(Integer.parseInt(input.trim()));
+        } catch (Exception e) {
+            p = findProductByName(input.trim());
+        }
+        if (p == null) {
+            JOptionPane.showMessageDialog(null, "Product not found!");
+            return;
+        }
 
         String info = "Product Found:\n\n" +
                 "Serial: "+p.serial+"\n"+
@@ -352,11 +358,16 @@ public class ShopManagementSystem {
 
     // ===== HELPERS =====
     public static Product findProductBySerial(int serial) {
-        for (Product p : products) if (p.serial == serial) return p;
+        for (Product p : products) {
+            if (p.serial == serial) return p;
+        }
         return null;
     }
+
     public static Product findProductByName(String name) {
-        for (Product p : products) if (p.name.equalsIgnoreCase(name)) return p;
+        for (Product p : products) {
+            if (p.name.equalsIgnoreCase(name)) return p;
+        }
         return null;
     }
 }
