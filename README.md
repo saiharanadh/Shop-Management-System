@@ -31,7 +31,7 @@ It allows the shop owner to **add, update, delete, and sell products**, track da
 ## ⚙️ How to Run
 1. Download or clone this repository:
    ```bash
-   git clone https://github.com/<your-username>/ShopManagementSystem.git
+    https://github.com/saiharanadh/ShopManagementSystem.git
 2.Open the project in your Java IDE.
 3.Compile and run ShopManagementSystem.java.
 3.Login credentials:
